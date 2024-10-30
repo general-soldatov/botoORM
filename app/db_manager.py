@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
 from app.models.client import Client
-from app.models.db_model import Key, KeySchema, DBModel, _params_convert, _dump_dict
+from app.models.db_model import Key, KeySchema, Filter, DBModel, _params_convert, _dump_dict
 
 @dataclass
 class ProvisionedThroughput:
@@ -129,26 +129,44 @@ class DynamodbManage(Client):
         keys = self._check_arg_models(keys)
         return self.client.delete_item(TableName=self.resource_name, Key=keys)
 
-    def scan(self, need_args: Optional[List[str]] = None, filters: Union[type, Dict[str, Any]] = None, **kwargs):
-        data = {
-            'TableName': self.resource_name
-        }
+    def scan(self, need_args: Optional[List[str]] = None, filters: Optional[Filter] = None, **kwargs):
+        """Метод сканирования базы данных. Для сортировки может быть использован класс Filter.
+            :type need_args: Optional[List[str]] = None
+            :param need_args: запрос требуемых аргументов
+            :type filters: Optional[Filter] = None
+            :param filters: экземпляр класса Filter, используется для фильтрации значений столбцов в таблице.
+        """
+        data = {'TableName': self.resource_name}
         if need_args:
             data['ProjectionExpression'] = ', '.join(need_args)
         if filters:
-            data['FilterExpression']='',
-            data['ExpressionAttributeValues'] = ''
+            data.update(filters)
         if kwargs:
             data.update(kwargs)
         return self._error_handler(self.client.scan(**data))
 
-    def query(self, hash: Key, range: Optional[Key] = None, need_args: Optional[List[str]] = None):
+    def query(self, hash: Key, range: Optional[Key] = None,
+              need_args: Optional[List[str]] = None, filters: Optional[Filter] = None, **kwargs):
+        """Метод запроса к базе данных по данным ключей. Для сортировки может быть использован класс Key.
+            :type hash: Key
+            :param hash: ключ партицирования
+            :type range: Optional[Key] = None
+            :param range: ключ сортировки
+            :type need_args: Optional[List[str]] = None
+            :param need_args: запрос требуемых аргументов
+            :type filters: Optional[Filter] = None
+            :param filters: экземпляр класса Filter, используется для фильтрации значений столбцов в таблице.
+        """
         data = {'TableName': self.resource_name}
         if range:
             hash.update(range)
         data['KeyConditions'] = hash
         if need_args:
             data['ProjectionExpression'] = ', '.join(need_args)
+        if filters:
+            data.update(filters)
+        if kwargs:
+            data.update(kwargs)
         return self._error_handler(self.client.query(**data))
 
     def delete_table(self):

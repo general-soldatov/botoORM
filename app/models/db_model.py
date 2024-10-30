@@ -124,3 +124,55 @@ class Key:
         """Операция между
         """
         return self.operator(self.name, value, operator='BETWEEN')
+
+class Filter:
+    def __init__(self, name: str) -> None:
+        self.name = name
+
+    @staticmethod
+    def operators(expression: str, value: dict, name: Optional[dict] = None):
+        data =  {
+            'FilterExpression' : expression ,
+            'ExpressionAttributeValues' : value
+                }
+        if name:
+            data['ExpressionAttributeNames'] = name
+        return data
+
+    def eq(self, value: Any):
+        return self.operators(
+            expression=f'{self.name} = :value',
+            value={':value' : _params_convert(type(value), value)}
+        )
+
+    def le(self, value: Any):
+        """Операция меньше или равно
+        """
+        return self.operators(
+            expression=f'{self.name} <= :value',
+            value={':value' : _params_convert(type(value), value)}
+        )
+
+    def lt(self, value: list):
+        """Операция меньше
+        """
+        return self.operators(
+            expression=f'{self.name} < :value',
+            value={':value' : _params_convert(type(value), value)}
+        )
+
+    def ge(self, value: list):
+        """Операция больше или равно
+        """
+        return self.operators(
+            expression=f'{self.name} >= :value',
+            value={':value' : _params_convert(type(value), value)}
+        )
+
+    def gt(self, value: list):
+        """Операция больше
+        """
+        return self.operators(
+            expression=f'{self.name} > :value',
+            value={':value' : _params_convert(type(value), value)}
+        )

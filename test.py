@@ -1,4 +1,4 @@
-from app.models.db_model import DBModel, KeySchema, Key
+from app.models.db_model import DBModel, KeySchema, Key, Filter
 from app.db_manager import DynamodbManage, ProvisionedThroughput
 
 class Table(DBModel):
@@ -15,7 +15,7 @@ db = DynamodbManage(resource_name='Table_test')
 # response = db.put_item(data)
 # response = db.get_item(key_schema('Yur', 238), need_args=['create', 'name'])
 # response = db.scan(need_args=['name', 'cheate'])
-response = db.query(Key('name').eq(value=['Eli']), range=Key('user_id').not_null())
+response = db.scan(filters=Filter('user_id').ge(237))
 
 print(response)
 # print(db._check_arg_models(key_schema('Yur', 238)))
