@@ -96,7 +96,7 @@ response = db.query(Key('name').eq(value=['Tso']), filters=Filter('user_id').ge(
 * lt - Операция меньше
 * ge - Операция больше или равно
 * gt - Операция больше
-* between - Операция между
+* between - Операция между.
 Для операции сканирования базы данных используется метод `scan`.
 ```python
 response = db.scan(filters=Filter('user_id').ge(237))
@@ -104,3 +104,7 @@ response = db.scan(filters=Filter('user_id').ge(237))
 Метод может принимать следующие необязательные аргументы:
 * need_args: Optional[List[str]] = None - запрос требуемых аргументов
 * filters: Optional[Filter] = None - экземпляр класса Filter, используется для фильтрации значений столбцов в таблице.
+Примеры использования низкоуровневых фильтров.
+* [Dynamodb scan() using FilterExpression](https://www.iditect.com/faq/python/dynamodb-scan-using-filterexpression.html)
+* [Boto3 DynamoDB Tutorial](https://hands-on.cloud/boto3/dynamodb/)
+* [Официальная документация](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html)

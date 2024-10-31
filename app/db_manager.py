@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
 from app.models.client import Client
+from app.models.config import AWSConfig, AWSSession, db_config
 from app.models.db_model import Key, KeySchema, Filter, DBModel, _params_convert, _dump_dict
 
 @dataclass
@@ -15,6 +16,9 @@ class ProvisionedThroughput:
 class DynamodbManage(Client):
     """Дочерний класс управления таблицами DynamoDB в облачных сервисах YandexCloud.
     """
+    def __init__(self, table_name: str, config: Union[AWSConfig, dict] = db_config, session_aws: Union[AWSSession, dict] = AWSSession()):
+        super().__init__(table_name, config, session_aws)
+
     @staticmethod
     def _table_params(resource_name: str, key_schema: Dict[str, str], attribute: Dict[str, str],
                       provisioned_throughput: Optional[Dict[str, str]] = None):
@@ -168,6 +172,30 @@ class DynamodbManage(Client):
         if kwargs:
             data.update(kwargs)
         return self._error_handler(self.client.query(**data))
+
+    def update_item(self, keys: KeySchema, args: Dict[str, Any], **kwargs):
+        """Метод обновления значений из таблицы по значению ключа / ключей.
+            :type args: Dict[str, Any]
+            :param args: словарь по схеме атрибут: значение для обновления атрибутов таблицы по значению ключа.
+                обновление значения словаря по схеме 'atr1.atr2'
+            :type keys: Dict[str, str | int ] или экземпляр датакласса KeySchema keys(HASH_VALUE, RANGE_VALUE)
+            :param keys: ключи доступа в формате {'key': 'value'}
+        """
+        data = {
+            'TableName': self.resource_name,
+            'Key': self._check_arg_models(keys),
+            'ReturnValues': "UPDATED_NEW"
+
+        }
+        attribute = [f'{item} = :arg_{i}' for i, item in enumerate(args.keys())]
+        data['UpdateExpression'] = f"set {', '.join(attribute)}"
+        data['ExpressionAttributeValues'] = {
+            f':arg_{i}': _params_convert(type(value), value)
+            for i, value in enumerate(args.values())
+        }
+        if kwargs:
+            data.update(kwargs)
+        return self._error_handler(self.client.update_item(**data))
 
     def delete_table(self):
         """Метод удаления таблицы из базы данных. Название таблицы берётся из resource_name экземпляра класса
