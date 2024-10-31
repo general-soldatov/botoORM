@@ -1,7 +1,8 @@
 # dynamodb_manager
-Библиотека для управления сервисами YandexCloud в serverless режиме на основе библиотеки `botocore` и `pydantic`.
+Фреймворк для управления сервисами YandexCloud в serverless режиме на основе библиотеки `botocore` и `pydantic`.
+С помощью фреймворка можно создавать объекты таблицы базы данных dynamodb и стандартного хранилища s3. И управлять непосредственно ими с помощью оптимизированного интерфейса. Названия методов идентичны методам библиотеки `botocore`, поэтому работать с этим фреймворком опытным программистам будет не сложно. Поскольку во фреймворке реализована далеко не вся функциональность библиотеки `botocore`, то в методах классов оставлены аргументы `**kwargs`, где вы можете использовать более тонкие запросы к AWS-сервисам YandexCloud. Проект находится в пилотном режиме, поэтому, если есть какие предложения по совершенствованию проекта, буду рад сотрудничеству.
 
-# Создание таблицы
+## Работа с базой данных dynamodb
 
 Для создания таблицы нужно определить ключевую схему с помощью класса `KeySchema`. Импортируем и объявим его экземпляр.
 
@@ -51,7 +52,7 @@ config = AWSConfig(service_name: str = 'example', endpoint_url: str = 'example',
 ```python
 from app.db_manager import DynamodbManage
 
-db = DynamodbManage(resource_name='Table_test')
+db = DynamodbManage(table_name='Table_test')
 db.create_table(key_schema, attribute=Table, provisioned_throughput=prov)
 ```
 Экземпляр класса `DynamodbManage` имеет следующие аргументы:
@@ -76,7 +77,7 @@ class Table(DBModel):
     create: float
 
 data = Table(name='Name', user_id=238, create=19.97)
-db = DynamodbManage(resource_name='Table_test')
+db = DynamodbManage(table_name='Table_test')
 db.put_item(data)
 ```
 Запрос по параметрам значений ключей
@@ -108,3 +109,41 @@ response = db.scan(filters=Filter('user_id').ge(237))
 * [Dynamodb scan() using FilterExpression](https://www.iditect.com/faq/python/dynamodb-scan-using-filterexpression.html)
 * [Boto3 DynamoDB Tutorial](https://hands-on.cloud/boto3/dynamodb/)
 * [Официальная документация](https://botocore.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb.html)
+
+
+## Работа с хранилищем s3
+Создаём экземпляр клиента `S3Manager` для работы с бакетом
+```python
+from app.s3_manager import S3Manager
+
+s3 = S3Manager(bucket_name='serverless-shortener')
+```
+Для создания бакета можно воспользоваться метода `create_bucket`.
+```python
+response = s3.create_bucket()
+```
+Загрузить строку или байты в бакет можно с помощью метода `put_object`.
+```py
+response = s3.put_object('TEST', name_file='test.txt')
+```
+Загрузить файл можно указав путь файла в методе `upload_file`:
+```py
+response = s3.upload_file(file_path='file/test.py', name_file='test.py')
+```
+Удалить один или несколько объектов можно следующим образом:
+```py
+response = s3.delete_objects(['manager.py', 'test.txt'])
+```
+Загрузить список объектов бакета можно с помощью метода `list_objects`
+```py
+response = s3.list_objects()
+```
+Загрузить объект файла можно с помощью метода `get_object`
+```py
+response = s3.get_str_object('index.html')
+print(response['Body'].read())
+```
+В качестве альтернативы можно воспользоваться методом строкового представления загружаемого файла `get_str_object`. Дополнительным параметром можно добавить кодировку.
+```py
+response = s3.get_str_object('index.html', encoding='utf-8')
+```

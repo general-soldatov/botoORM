@@ -17,3 +17,4 @@ class AWSConfig:
     region_name: str = getenv('AWS_DEFAULT_REGION')
 
 db_config = AWSConfig(service_name='dynamodb', endpoint_url=getenv('ENDPOINT'))
+s3_config = AWSConfig(service_name='s3', endpoint_url=getenv('ENDPOINT_STORAGE'))
