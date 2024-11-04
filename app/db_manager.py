@@ -2,7 +2,8 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
 from app.models.client import Client
 from app.models.config import AWSConfig, AWSSession, db_config
-from app.models.db_model import Key, KeySchema, Filter, DBModel, _params_convert, _dump_dict
+from app.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
+from app.filter import Key, Filter
 
 @dataclass
 class ProvisionedThroughput:
