@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
-from app.models.client import Client
-from app.models.config import AWSConfig, AWSSession, db_config
-from app.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
-from app.filter import Key, Filter
+from boto_orm.models.client import Client
+from boto_orm.models.config import AWSConfig, AWSSession, db_config
+from boto_orm.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
+from boto_orm.filter import Key, Filter
 
 @dataclass
 class ProvisionedThroughput:

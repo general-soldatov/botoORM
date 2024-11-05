@@ -1,7 +1,7 @@
-from app.models.db_model import DBModel, KeySchema
-from app.filter import Key, Filter
-from app.db_manager import DynamodbManage, ProvisionedThroughput
-from app.s3_manager import S3Manager
+from boto_orm.models.db_model import DBModel, KeySchema
+from boto_orm.filter import Key, Filter
+from boto_orm.db_manager import DynamodbManage, ProvisionedThroughput
+from boto_orm.s3_manager import S3Manager
 
 class Table(DBModel):
     name: str
