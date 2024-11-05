@@ -7,7 +7,7 @@
 Для создания таблицы нужно определить ключевую схему с помощью класса `KeySchema`. Импортируем и объявим его экземпляр.
 
 ```python
-from app.models.db_model import KeySchema
+from boto_orm.models.db_model import KeySchema
 
 key_schema = KeySchema(HASH='name', RANGE='user_id')
 
@@ -15,7 +15,7 @@ key_schema = KeySchema(HASH='name', RANGE='user_id')
 Также определим схему таблицы с помощью класса на базе модели `DBModel`. Имена ключей, объявленные в ключевой схеме, должны присутствовать в классе модели.
 
 ```python
-from app.models.db_model import DBModel
+from boto_orm.models.db_model import DBModel
 
 class Table(DBModel):
     name: str
@@ -26,22 +26,23 @@ class Table(DBModel):
 Для ограничения пропускной способности, воспользуйтесь экземпляром класса `ProvisionedThroughput`.
 
 ```python
-from app.db_manager import ProvisionedThroughput
+from boto_orm.db_manager import ProvisionedThroughput
 prov = ProvisionedThroughput(ReadCapacityUnits=1, WriteCapacityUnits=1)
 ```
 
 Для работы с сервисами AWS необходимо использование переменных окружения в файле `.env`:
 ```env
-ENDPOINT ='example'
-AWS_DEFAULT_REGION = 'ru-central1'
-AWS_ACCESS_KEY_ID='example'
-AWS_SECRET_ACCESS_KEY='example'
+ENDPOINT_DB = 'example'
+ENDPOINT_S3 = 'https://storage.yandexcloud.net'
+REGION_NAME = 'ru-central1'
+ACCESS_KEY='example'
+SECRET_KEY='example'
 ```
 
 Либо создать свой конфиг на базе экземпляров классов `AWSConfig` и `AWSSession`.
 
 ```python
-from app.models.config import AWSConfig, AWSSession
+from boto_orm.models.config import AWSConfig, AWSSession
 
 session = AWSSession(access_key: str = 'example', secret_key: str = 'example')
 config = AWSConfig(service_name: str = 'example', endpoint_url: str = 'example', region_name: str = 'example')
@@ -50,7 +51,7 @@ config = AWSConfig(service_name: str = 'example', endpoint_url: str = 'example',
 Создать таблицу можно с помощью метода `create_table` экземпляра класса `DynamodbManage`
 
 ```python
-from app.db_manager import DynamodbManage
+from boto_orm.db_manager import DynamodbManage
 
 db = DynamodbManage(table_name='Table_test')
 db.create_table(key_schema, attribute=Table, provisioned_throughput=prov)
@@ -69,7 +70,7 @@ session_aws: Union[AWSSession, dict] # конфигурация сессии bot
 
 Добавить элемент в таблицу можно с помощью команды:
 ```python
-from app.models.db_model import DBModel
+from boto_orm.models.db_model import DBModel
 
 class Table(DBModel):
     name: str
@@ -86,7 +87,7 @@ response = db.query(Key('name').eq(value=['Tso']), range=Key('user_id').eq([239]
 ```
 Для запроса возможно использование значения только ключа партицирования. Также во фреймворке предусмотрена возможность фильтрации по параметрам, не являющимися ключами:
 ```python
-from app.filter import Key, Filter
+from boto_orm.filter import Key, Filter
 
 response = db.query(Key('name').eq(value=['Tso']), filters=Filter('user_id').ge(249))
 ```
@@ -116,7 +117,7 @@ response = db.scan(filters=Filter('user_id').ge(237))
 ## Работа с хранилищем s3
 Создаём экземпляр клиента `S3Manager` для работы с бакетом
 ```python
-from app.s3_manager import S3Manager
+from boto_orm.s3_manager import S3Manager
 
 s3 = S3Manager(bucket_name='serverless-shortener')
 ```
