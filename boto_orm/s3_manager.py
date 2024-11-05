@@ -1,6 +1,6 @@
 from typing import Dict, Optional, Union, List, Any
-from app.models.client import Client
-from app.models.config import AWSConfig, AWSSession, s3_config
+from boto_orm.models.client import Client
+from boto_orm.models.config import AWSConfig, AWSSession, s3_config
 
 
 class S3Manager(Client):

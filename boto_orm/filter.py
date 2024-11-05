@@ -1,4 +1,4 @@
-from app.models.db_model import _params_convert
+from boto_orm.models.db_model import _params_convert
 from typing import Any
 
 class Key:

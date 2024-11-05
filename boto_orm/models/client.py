@@ -3,8 +3,8 @@ import botocore.session
 from botocore.session import Session
 from typing import Union
 
-from app.models.db_model import DBModel
-from app.models.config import db_config, AWSConfig, AWSSession
+from boto_orm.models.db_model import DBModel
+from boto_orm.models.config import db_config, AWSConfig, AWSSession
 
 
 class Client:
