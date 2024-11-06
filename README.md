@@ -54,6 +54,13 @@ session = AWSSession(access_key: str = 'example', secret_key: str = 'example')
 config = AWSConfig(service_name: str = 'example', endpoint_url: str = 'example', region_name: str = 'example')
 ```
 
+Можно создать свой файл конфигурации `boto-orm.yaml`, для этого необходимо сделать свой наследный класс от `boto_orm.models.config.BaseConfig`.
+```py
+class Configure(BaseConfig):
+    session: AWSSession
+    db_config: AWSConfig
+    s3_config: AWSConfig
+```
 Создать таблицу можно с помощью метода `create_table` экземпляра класса `DynamodbManage`
 
 ```python

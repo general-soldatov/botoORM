@@ -13,12 +13,7 @@ class AWSConfig(BaseModel):
     endpoint_url: str
     region_name: str
 
-
-class Configure(BaseSettings):
-    session: AWSSession
-    db_config: AWSConfig
-    s3_config: AWSConfig
-
+class BaseConfig(BaseSettings):
     model_config = SettingsConfigDict(yaml_file='boto-orm.yaml')
 
     @classmethod
@@ -31,6 +26,13 @@ class Configure(BaseSettings):
         file_secret_settings: PydanticBaseSettingsSource,
     ) -> Tuple[PydanticBaseSettingsSource, ...]:
         return (YamlConfigSettingsSource(settings_cls), )
+
+
+class Configure(BaseConfig):
+    session: AWSSession
+    db_config: AWSConfig
+    s3_config: AWSConfig
+
 
 if os.path.exists('boto-orm.yaml'):
     config = Configure()
