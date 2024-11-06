@@ -2,6 +2,7 @@ from boto_orm.models.db_model import DBModel, KeySchema
 from boto_orm.filter import Key, Filter
 from boto_orm.db_manager import DynamodbManage, ProvisionedThroughput
 from boto_orm.s3_manager import S3Manager
+# from boto_orm.models.config import Configure
 
 class Table(DBModel):
     name: str
@@ -28,10 +29,11 @@ s3 = S3Manager(bucket_name='serverless-shortener')
 # response = s3.upload_file(file_path='app/s3_manager.py', name_file='manager.py')
 # response = s3.delete_objects(['manager.py', 'test.txt'])
 # response = s3.list_objects()
-response = s3.get_str_object('index.html')
+# response = s3.get_str_object('index.html')
 
-print(response)
+# print(response)
 # print(db._check_arg_models(key_schema('Yur', 238)))
 # print(response['Items'])
 # print(key_schema.query(HASH_VALUE=['Eli', 'Yur']))
 # print(Filter('user_id').between([237, 235]))
+# print(Configure())

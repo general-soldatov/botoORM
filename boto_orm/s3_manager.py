@@ -1,10 +1,12 @@
-from typing import Dict, Optional, Union, List, Any
+from typing import Union, List
 from boto_orm.models.client import Client
-from boto_orm.models.config import AWSConfig, AWSSession, s3_config
+from boto_orm.models.config import AWSConfig, AWSSession, config
 
 
 class S3Manager(Client):
-    def __init__(self, bucket_name: str, config: Union[AWSConfig, dict] = s3_config, session_aws: Union[AWSSession, dict] = AWSSession()):
+    def __init__(self, bucket_name: str,
+                 config: Union[AWSConfig, dict] = config.s3_config,
+                 session_aws: Union[AWSSession, dict] = config.session):
         super().__init__(bucket_name, config, session_aws)
 
     def create_bucket(self, **kwargs):

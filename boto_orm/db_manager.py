@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
 from boto_orm.models.client import Client
-from boto_orm.models.config import AWSConfig, AWSSession, db_config
+from boto_orm.models.config import AWSConfig, AWSSession, config
 from boto_orm.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
 from boto_orm.filter import Key, Filter
 
@@ -17,7 +17,8 @@ class ProvisionedThroughput:
 class DynamodbManage(Client):
     """Дочерний класс управления таблицами DynamoDB в облачных сервисах YandexCloud.
     """
-    def __init__(self, table_name: str, config: Union[AWSConfig, dict] = db_config, session_aws: Union[AWSSession, dict] = AWSSession()):
+    def __init__(self, table_name: str, config: Union[AWSConfig, dict] = config.db_config,
+                 session_aws: Union[AWSSession, dict] = config.session):
         super().__init__(table_name, config, session_aws)
 
     @staticmethod

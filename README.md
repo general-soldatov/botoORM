@@ -30,13 +30,19 @@ from boto_orm.db_manager import ProvisionedThroughput
 prov = ProvisionedThroughput(ReadCapacityUnits=1, WriteCapacityUnits=1)
 ```
 
-Для работы с сервисами AWS необходимо использование переменных окружения в файле `.env`:
-```env
-ENDPOINT_DB = 'example'
-ENDPOINT_S3 = 'https://storage.yandexcloud.net'
-REGION_NAME = 'ru-central1'
-ACCESS_KEY='example'
-SECRET_KEY='example'
+Для работы с сервисами AWS необходимо использование переменных окружения. Для этого создадим файл `boto-orm.yaml` в корневом каталоге со следующим содержимым (example заменить на свои переменные):
+```yaml
+session:
+    access_key: 'key example'
+    secret_key: 'secret example'
+db_config:
+    service_name: 'dynamodb'
+    endpoint_url: 'https://example.com'
+    region_name: 'ru-central1'
+s3_config:
+    service_name: 's3'
+    endpoint_url: 'https://storage.example.com'
+    region_name: 'ru-central1'
 ```
 
 Либо создать свой конфиг на базе экземпляров классов `AWSConfig` и `AWSSession`.
