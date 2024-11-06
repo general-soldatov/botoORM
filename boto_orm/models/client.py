@@ -4,7 +4,7 @@ from botocore.session import Session
 from typing import Union
 
 from boto_orm.models.db_model import DBModel
-from boto_orm.models.config import config, AWSConfig, AWSSession
+from boto_orm.models.config import AWSConfig, AWSSession
 
 
 class Client:
@@ -14,8 +14,8 @@ class Client:
         :param session_aws: Union[AWSSession, dict] - конфигурация сессии botocore: access_key: str, secret_key: str
     """
     def __init__(self, resource_name: str,
-                 config: Union[AWSConfig, dict] = config.db_config,
-                 session_aws: Union[AWSSession, dict] = config.session):
+                 config: Union[AWSConfig, dict],
+                 session_aws: Union[AWSSession, dict]):
         config = self._check_type_models(config, AWSConfig)
         session_aws = self._check_type_models(session_aws, AWSSession)
         _aws: Session = botocore.session.get_session()

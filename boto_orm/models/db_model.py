@@ -30,16 +30,39 @@ def _params_convert(arg: type, value: Any = None):
             return PARAMS[str]
         return PARAMS[arg]
 
-    condition = lambda x: type(x) not in [str, int, float, bytes]
+    def recursion(value):
+        result = {}
+        condition = lambda x: type(x) not in [str, int, float, bytes]
+        if isinstance(value, dict):
+            for key, val in value.items():
+                if isinstance(val, dict):
+                    result[key] = recursion(val)
+                else:
+                    result[key] = {convert(type(val)): val if condition(val) else str(val)}
+            return {'M': result}
+        elif isinstance(value, list):
+            return {'L': [recursion(item) for item in value]}
+        return {convert(type(value)): value if condition(value) else str(value)}
+
     if value:
-        return {convert(arg): value if condition(value) else str(value)}
+        return recursion(value)
     return convert(arg)
 
 def _dump_dict(data: Dict[str, Dict[str, str]]):
     result = {}
     for key, values in data.items():
-        types, value = tuple(values.items())[0]
-        result[key] = PARAMS_REVERSE[types](value)
+        if isinstance(values, dict):
+            types, value = tuple(values.items())[0]
+            if types == 'M':
+                result[key] = _dump_dict(value)
+            elif types == 'L':
+                result[key] = [_dump_dict(item) for item in value]
+            elif types not in PARAMS_REVERSE.keys():
+                return {types: _dump_dict(value)}
+            else:
+                result[key] = PARAMS_REVERSE[types](value)
+        else:
+            return values
 
     return result
 
