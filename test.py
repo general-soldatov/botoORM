@@ -12,7 +12,7 @@ class Table(DBModel):
     data: dict
 
 key_schema = KeySchema(HASH='name', RANGE='user_id')
-data = Table(name='Eli', user_id=249, create=20.07, data={'df': {'233': 22}, 'gh': 'fgh'}, tasks=['33', 44, 3.44, {'dd': 34}])
+data = Table(name='Eli', user_id=249, create=20.07, data={'df': {'233': {'dffg': 22}}, 'gh': 'fgh'}, tasks=['33', 44, 3.44, {'dd': 34}])
 prov = ProvisionedThroughput(ReadCapacityUnits=1, WriteCapacityUnits=1)
 
 db = DynamodbManage(table_name='Table_test')
