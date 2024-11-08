@@ -165,3 +165,7 @@ print(response['Body'].read())
 ```py
 response = s3.get_str_object('index.html', encoding='utf-8')
 ```
+## Полезные ссылки
+* [Как, почему и когда следует использовать одно-табличный дизайн в DynamoDB](https://habr.com/ru/articles/732578/)
+* [Документация к boto](https://yandex.cloud/ru/docs/storage/tools/boto?utm_referrer=https%3A%2F%2Fyndx.auth.yandex.cloud%2F)
+* [Как работать с объектным хранилищем на Python](https://habr.com/ru/companies/selectel/articles/822855/)
