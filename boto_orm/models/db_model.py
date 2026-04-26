@@ -3,11 +3,10 @@ from dataclasses import dataclass
 from typing import Optional, Any, Dict, Union
 
 PARAMS = {
+            bool: 'BOOL',
             int: 'N',
             float: 'N',
             str: 'S',
-            bool: 'BOOL',
-            None: 'NULL',
             list: 'L',
             tuple: 'L',
             dict: 'M',
@@ -24,11 +23,12 @@ PARAMS_REVERSE = {
     'B': bytes
 }
 
-def _params_convert(arg: type, value: Any = None):
+def _params_convert(value: Any):
     def convert(arg: type):
-        if arg not in PARAMS:
-            return PARAMS[str]
-        return PARAMS[arg]
+        for key, value in PARAMS.items():
+            if isinstance(arg, key):
+                return value
+        return PARAMS[str]
 
     def recursion(value):
         result = {}
@@ -38,15 +38,14 @@ def _params_convert(arg: type, value: Any = None):
                 if isinstance(val, dict):
                     result[key] = recursion(val)
                 else:
-                    result[key] = {convert(type(val)): val if condition(val) else str(val)}
+                    result[key] = {convert(val): (val if condition(val) else str(val))}
             return {'M': result}
         elif isinstance(value, list):
             return {'L': [recursion(item) for item in value]}
-        return {convert(type(value)): value if condition(value) else str(value)}
-
-    if value:
-        return recursion(value)
-    return convert(arg)
+        elif value is None:
+            return {'NULL': True}        
+        return {convert(value): value if condition(value) else str(value)}
+    return recursion(value)
 
 def _dump_dict(data: Dict[str, Dict[str, str]]):
     result = {}
@@ -68,7 +67,7 @@ def _dump_dict(data: Dict[str, Dict[str, str]]):
 
 class DBModel(BaseModel):
     def dump_dynamodb(self):
-        return {key: _params_convert(type(key), value)
+        return {key: _params_convert(value)
                 for key, value in self.model_dump().items()}
 
     @classmethod
