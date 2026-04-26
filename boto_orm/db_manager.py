@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Dict, Optional, Union, List, Any
 from boto_orm.models.client import Client
-from boto_orm.models.config import AWSConfig, AWSSession, config
+from boto_orm.models.config import AWSConfig, AWSSession
 from boto_orm.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
 from boto_orm.filter import Key, Filter
 
@@ -17,8 +17,8 @@ class ProvisionedThroughput:
 class DynamodbManage(Client):
     """Дочерний класс управления таблицами DynamoDB в облачных сервисах YandexCloud.
     """
-    def __init__(self, table_name: str, config: Union[AWSConfig, dict] = config.db_config,
-                 session_aws: Union[AWSSession, dict] = config.session):
+    def __init__(self, table_name: str, config: Union[AWSConfig, dict],
+                 session_aws: Union[AWSSession, dict]):
         super().__init__(table_name, config, session_aws)
 
     @staticmethod
@@ -52,7 +52,7 @@ class DynamodbManage(Client):
         if isinstance(arg, DBModel):
             return arg.dump_dynamodb()
         elif isinstance(arg, dict):
-            return {key: _params_convert(type(value), value)
+            return {key: _params_convert(value)
                 for key, value in arg.items()}
         else:
             assert TypeError('Uncorrect type param "arg"')
@@ -192,7 +192,7 @@ class DynamodbManage(Client):
         attribute = [f'{item} = :arg_{i}' for i, item in enumerate(args.keys())]
         data['UpdateExpression'] = f"set {', '.join(attribute)}"
         data['ExpressionAttributeValues'] = {
-            f':arg_{i}': _params_convert(type(value), value)
+            f':arg_{i}': _params_convert(value)
             for i, value in enumerate(args.values())
         }
         if kwargs:
