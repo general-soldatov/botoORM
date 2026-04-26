@@ -68,7 +68,7 @@ def _dump_dict(data: Dict[str, Dict[str, str]]):
 
 class DBModel(BaseModel):
     def dump_dynamodb(self):
-        return {key: _params_convert(self.__annotations__[key], value)
+        return {key: _params_convert(type(key), value)
                 for key, value in self.model_dump().items()}
 
     @classmethod
