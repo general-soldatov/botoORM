@@ -80,7 +80,7 @@ class DynamodbManage(Client):
 
 
     def create_table(self, key_schema: Union[Dict[str, str], KeySchema],
-                      attribute: Union[Dict[str, str], DBModel],
+                      attribute: DBModel,
                       provisioned_throughput: Union[Dict[str, str], ProvisionedThroughput, None] = None):
         """Метод создания таблицы.
             :type key_schema: Union[Dict[str, str], KeySchema]
