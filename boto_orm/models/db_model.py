@@ -23,13 +23,19 @@ PARAMS_REVERSE = {
     'B': bytes
 }
 
-def _params_convert(value: Any):
-    def convert(arg: type):
-        for key, value in PARAMS.items():
-            if isinstance(arg, key):
-                return value
-        return PARAMS[str]
+def convert_annotation(arg: type):
+    for key, value in PARAMS.items():
+        if arg == key:
+            return value
+    return PARAMS[str]
 
+def convert(arg: Any):
+    for key, value in PARAMS.items():
+        if isinstance(arg, key):
+            return value
+    return PARAMS[str]
+
+def _params_convert(value: Any):
     def recursion(value):
         result = {}
         condition = lambda x: type(x) not in [str, int, float, bytes]
@@ -72,8 +78,8 @@ class DBModel(BaseModel):
 
     @classmethod
     def dump_schema_db(cls):
-        return {key: _params_convert(value) for key, value in
-                            cls.__annotations__.items()}
+        return {key: convert_annotation(value.annotation) for key, value in
+                            cls.model_fields.items()}
 
 
 @dataclass
