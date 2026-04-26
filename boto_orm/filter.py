@@ -9,7 +9,7 @@ class Key:
     def operator(key, value, operator):
         data = {'ComparisonOperator': operator}
         if value:
-            data['AttributeValueList'] = [_params_convert(type(item), item)
+            data['AttributeValueList'] = [_params_convert(item)
                                             for item in value]
         return {key: data}
 
@@ -72,7 +72,7 @@ class Filter(Key):
         }
         data =  {
             'FilterExpression' : f'{name} {lst_operator["EQ"]} :value' ,
-            'ExpressionAttributeValues' : {':value' : _params_convert(type(value), value)}
+            'ExpressionAttributeValues' : {':value' : _params_convert(value)}
                 }
 
         return data
