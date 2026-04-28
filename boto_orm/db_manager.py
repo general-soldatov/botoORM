@@ -4,6 +4,10 @@ from boto_orm.models.client import Client
 from boto_orm.models.config import AWSConfig, AWSSession
 from boto_orm.models.db_model import KeySchema, DBModel, _params_convert, _dump_dict
 from boto_orm.filter import Key, Filter
+from botocore.exceptions import ClientError, BotoCoreError
+import logging
+
+logger = logging.getLogger()
 
 @dataclass
 class ProvisionedThroughput:
@@ -48,12 +52,15 @@ class DynamodbManage(Client):
 
 
     @staticmethod
-    def _check_arg_models(arg: Union[DBModel, Dict[str, dict]]):
+    def _check_arg_models(arg: Union[DBModel, KeySchema, Dict[str, dict]]):
         if isinstance(arg, DBModel):
             return arg.dump_dynamodb()
         elif isinstance(arg, dict):
             return {key: _params_convert(value)
                 for key, value in arg.items()}
+        elif isinstance(arg, KeySchema):
+            return {key: _params_convert(value)
+                for key, value in arg.__dict__.items()}
         else:
             assert TypeError('Uncorrect type param "arg"')
 
@@ -110,22 +117,85 @@ class DynamodbManage(Client):
         response = self.client.put_item(TableName=self.resource_name, Item=data)
         return self._error_handler(response)
 
-    def get_item(self, keys: KeySchema, need_args: Optional[List[str]] = None, **kwargs):
-        """Метод запроса значения из таблицы по значению ключа / ключей.
-            :type need_args: Optional[List[str]] = None
-            :param need_args: список требуемых параметров для вызова
-            :type keys: Dict[str, str | int ] или экземпляр датакласса KeySchema keys(HASH_VALUE, RANGE_VALUE)
-            :param keys: ключи доступа в формате {'key': 'value'}
+    # def get_item(self, keys: KeySchema | dict, need_args: Optional[List[str]] = None, **kwargs):
+    #     """Метод запроса значения из таблицы по значению ключа / ключей.
+    #         :type need_args: Optional[List[str]] = None
+    #         :param need_args: список требуемых параметров для вызова
+    #         :type keys: Dict[str, str | int ] или экземпляр датакласса KeySchema keys(HASH_VALUE, RANGE_VALUE)
+    #         :param keys: ключи доступа в формате {'key': 'value'}
+    #     """
+    #     data = {
+    #         'TableName': self.resource_name,
+    #         'Key': {key: _params_convert(value) for key, value in keys.items()}
+    #     }
+    #     if need_args:
+    #         data['ProjectionExpression'] = ', '.join(need_args)
+    #     if kwargs:
+    #         data.update(kwargs)
+    #     return self._error_handler(self.client.get_item(**data))
+    
+    def get_item(
+        self,
+        keys: Dict[str, Any],
+        consistent_read: bool = False,
+        projection_expression: Optional[List[str]] = None,
+        expression_attribute_names: Optional[Dict[str, str]] = None
+    ) -> Optional[Dict[str, Any]]:
         """
-        data = {
+        Получает элемент из DynamoDB по ключу.
+        
+        Args:
+            table_name: Имя таблицы
+            key: Ключ в формате DynamoDB {'field': {'S': 'value'}}
+            consistent_read: Последовательное чтение
+            projection_expression: Выражение проекции
+            expression_attribute_names: Имена атрибутов
+        
+        Returns:
+            Словарь с данными или None если не найдено
+        """
+        # Формируем запрос
+        request = {
             'TableName': self.resource_name,
-            'Key': self._check_arg_models(keys)
+            'Key': {key: _params_convert(value) for key, value in keys.items()},
+            'ConsistentRead': consistent_read
         }
-        if need_args:
-            data['ProjectionExpression'] = ', '.join(need_args)
-        if kwargs:
-            data.update(kwargs)
-        return self._error_handler(self.client.get_item(**data))
+        if projection_expression:
+            request['ProjectionExpression'] = ', '.join(projection_expression)
+        # if projection_expression:
+        #     request['ProjectionExpression'] = projection_expression
+        
+        if expression_attribute_names:
+            request['ExpressionAttributeNames'] = expression_attribute_names
+        
+        try:
+            # Выполняем запрос
+            response = self.client.get_item(**request)
+            
+            # Проверяем наличие элемента
+            if 'Item' not in response:
+                logger.info(f"Item not found in {self.resource_name} with key {key}")
+                return None
+            
+            return _dump_dict(response['Item'])
+        except ClientError as e:
+            error_code = e.response['Error']['Code']
+            
+            if error_code == 'ResourceNotFoundException':
+                logger.error(f"Table {self.resource_name} does not exist")
+            elif error_code == 'ProvisionedThroughputExceededException':
+                logger.error(f"Throughput exceeded for table {self.resource_name}")
+            elif error_code == 'InternalServerError':
+                logger.error(f"Internal server error for table {self.resource_name}")
+            else:
+                logger.error(f"DynamoDB error: {e}")
+            
+            raise
+        
+        except BotoCoreError as e:
+            logger.error(f"BotoCore error: {e}")
+            raise
+        
 
     def delete_item(self, keys: KeySchema):
         """Метод удаления значения из таблицы по значению ключа / ключей.
